@@ -1,0 +1,14 @@
+[03-Jun-2025 15:53:29 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/customer/www/utp.equiposh1.sg-host.com/public_html/vendor/composer/../ralouphie/getallheaders/src/getallheaders.php' (include_path='.:/usr/local/php82/pear') in /home/customer/www/utp.equiposh1.sg-host.com/public_html/vendor/composer/autoload_real.php:41
+Stack trace:
+#0 /home/customer/www/utp.equiposh1.sg-host.com/public_html/vendor/composer/autoload_real.php(45): {closure}('7b11c4dc42b3b30...', '/home/customer/...')
+#1 /home/customer/www/utp.equiposh1.sg-host.com/public_html/vendor/autoload.php(22): ComposerAutoloaderInit3e6e79e410cd98a8d86f36f772fe3690::getLoader()
+#2 /home/customer/www/utp.equiposh1.sg-host.com/public_html/main/login.php(8): require_once('/home/customer/...')
+#3 {main}
+  thrown in /home/customer/www/utp.equiposh1.sg-host.com/public_html/vendor/composer/autoload_real.php on line 41
+[03-Jun-2025 15:53:53 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/customer/www/utp.equiposh1.sg-host.com/public_html/vendor/composer/../ralouphie/getallheaders/src/getallheaders.php' (include_path='.:/usr/local/php82/pear') in /home/customer/www/utp.equiposh1.sg-host.com/public_html/vendor/composer/autoload_real.php:41
+Stack trace:
+#0 /home/customer/www/utp.equiposh1.sg-host.com/public_html/vendor/composer/autoload_real.php(45): {closure}('7b11c4dc42b3b30...', '/home/customer/...')
+#1 /home/customer/www/utp.equiposh1.sg-host.com/public_html/vendor/autoload.php(22): ComposerAutoloaderInit3e6e79e410cd98a8d86f36f772fe3690::getLoader()
+#2 /home/customer/www/utp.equiposh1.sg-host.com/public_html/main/login.php(8): require_once('/home/customer/...')
+#3 {main}
+  thrown in /home/customer/www/utp.equiposh1.sg-host.com/public_html/vendor/composer/autoload_real.php on line 41
