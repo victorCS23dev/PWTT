@@ -1,0 +1,167 @@
+CREATE DATABASE bd_pwtt;
+USE bd_pwtt;
+
+-- Tabla de Usuarios
+CREATE TABLE usuarios (
+    idUsuarios INT PRIMARY KEY AUTO_INCREMENT,
+    google_id VARCHAR(255) UNIQUE NULL,
+    dni CHAR(8) NOT NULL,
+    nombres VARCHAR(100) NOT NULL,
+    apellidos VARCHAR(100),
+    correo VARCHAR(100) NOT NULL UNIQUE,
+    contrasena VARCHAR(255) NOT NULL,
+    telefono CHAR(9),
+    direccion VARCHAR(255),
+    rol ENUM('administrador','empleado','cliente') NOT NULL,
+    estado BOOLEAN DEFAULT 1,
+    creado_por INT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    modificado_por INT NULL,
+    fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    recibir_notificaciones_descuento BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (creado_por) REFERENCES usuarios(idUsuarios),
+    FOREIGN KEY (modificado_por) REFERENCES usuarios(idUsuarios)
+);
+
+-- Tabla de Categorías
+CREATE TABLE categorias (
+    idCategorias INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    estado BOOLEAN DEFAULT 1,
+    creado_por INT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    modificado_por INT NULL,
+    fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (creado_por) REFERENCES usuarios(idUsuarios),
+    FOREIGN KEY (modificado_por) REFERENCES usuarios(idUsuarios)
+);
+
+-- Tabla de Marcas
+CREATE TABLE marcas (
+    idMarcas INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL UNIQUE, -- Aseguramos que los nombres de marca sean únicos
+    estado BOOLEAN DEFAULT 1,
+    creado_por INT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    modificado_por INT NULL,
+    fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (creado_por) REFERENCES usuarios(idUsuarios),
+    FOREIGN KEY (modificado_por) REFERENCES usuarios(idUsuarios)
+);
+
+-- Tabla de Productos
+CREATE TABLE productos (
+    idProductos INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    idMarcas INT NOT NULL, -- NUEVO: Clave foránea para la tabla 'marcas'
+    descripcion TEXT,
+    precio DECIMAL(10,2) NOT NULL,
+    stock INT NOT NULL,
+    idCategorias INT NOT NULL,
+    imagen_url VARCHAR(255),
+    estado BOOLEAN DEFAULT 1,
+    creado_por INT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    modificado_por INT NULL,
+    fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (idCategorias) REFERENCES categorias(idCategorias),
+    FOREIGN KEY (idMarcas) REFERENCES marcas(idMarcas), -- NUEVO: Foreign Key a la tabla 'marcas'
+    FOREIGN KEY (creado_por) REFERENCES usuarios(idUsuarios),
+    FOREIGN KEY (modificado_por) REFERENCES usuarios(idUsuarios)
+);
+
+-- Tabla de Descuentos
+CREATE TABLE codigos_descuento (
+    idCodigo INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(50) NOT NULL UNIQUE, -- El código que el usuario ingresará (ej. MADRE)
+    valor_descuento DECIMAL(5,2) NOT NULL, -- El valor del descuento en porcentaje (ej. 10.00 para 10%)
+    aplica_a_categoria INT NULL, -- ID de la categoría si aplica a una específica (NULL para todas)
+    aplica_a_marca INT NULL, -- ID de la marca si aplica a una específica (NULL para todas)
+    descripcion TEXT NULL, -- Descripción del código de descuento
+    fecha_inicio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de inicio de validez
+    fecha_fin DATETIME NULL, -- Fecha y hora de fin de validez (NULL si no expira)
+    estado BOOLEAN DEFAULT 1, -- 1: Activo, 0: Inactivo (para habilitar/deshabilitar)
+    
+    creado_por INT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    modificado_por INT NULL,
+    fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (aplica_a_categoria) REFERENCES categorias(idCategorias) ON DELETE SET NULL,
+    FOREIGN KEY (aplica_a_marca) REFERENCES marcas(idMarcas) ON DELETE SET NULL,
+    FOREIGN KEY (creado_por) REFERENCES usuarios(idUsuarios) ON DELETE SET NULL,
+    FOREIGN KEY (modificado_por) REFERENCES usuarios(idUsuarios) ON DELETE SET NULL
+);
+
+-- Tabla de Factura Cabecera
+CREATE TABLE factura_cabecera (
+    idFactura INT PRIMARY KEY AUTO_INCREMENT,
+    idUsuario INT NOT NULL,
+    fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+    metodo_pago VARCHAR(50) NOT NULL,
+    idCodigoDescuento INT NULL,
+    monto_total DECIMAL(10, 2) NOT NULL,
+    monto_descuento  DECIMAL(10,2) DEFAULT 0.00,
+    estado INT DEFAULT 1,
+    modificado_por INT NULL,
+    fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuarios),
+    FOREIGN KEY (idCodigoDescuento) REFERENCES codigos_descuento(idCodigo),
+    FOREIGN KEY (modificado_por) REFERENCES usuarios(idUsuarios)
+);
+
+-- Tabla de Factura Detalle
+CREATE TABLE factura_detalle (
+    idDetalle INT PRIMARY KEY AUTO_INCREMENT,
+    idFactura INT NOT NULL,
+    idProducto INT NULL,
+    cantidad INT NOT NULL,
+    precio_unitario DECIMAL(10, 2) NOT NULL,
+    subtotal DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (idFactura) REFERENCES factura_cabecera(idFactura),
+    FOREIGN KEY (idProducto) REFERENCES productos(idProductos) ON DELETE SET NULL
+);
+
+CREATE TABLE `password_resets` (
+    `email` VARCHAR(255) NOT NULL,
+    `token` VARCHAR(255) PRIMARY KEY,
+    `expires_at` DATETIME NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`email`) REFERENCES `usuarios`(`correo`) ON DELETE CASCADE
+);
+
+CREATE TABLE categoria_marca (
+    idCategorias INT NOT NULL,
+    idMarcas INT NOT NULL,
+    -- Campos de auditoría para la tabla de relación
+    creado_por INT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    modificado_por INT NULL,
+    fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (idCategorias, idMarcas), -- Clave primaria compuesta
+    FOREIGN KEY (idCategorias) REFERENCES categorias(idCategorias) ON DELETE CASCADE,
+    FOREIGN KEY (idMarcas) REFERENCES marcas(idMarcas) ON DELETE CASCADE,
+    FOREIGN KEY (creado_por) REFERENCES usuarios(idUsuarios),
+    FOREIGN KEY (modificado_por) REFERENCES usuarios(idUsuarios)
+);
+
+CREATE TABLE reseñas_productos (
+    idReseña INT PRIMARY KEY AUTO_INCREMENT,
+    idProducto INT NOT NULL,
+    idUsuario INT NOT NULL,
+    calificacion INT NOT NULL CHECK (calificacion >= 1 AND calificacion <= 5), -- Calificación de 1 a 5 estrellas
+    comentario TEXT NULL, -- El comentario es opcional
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    estado BOOLEAN DEFAULT 1, -- 1: Activa/Aprobada, 0: Pendiente/Oculta (para moderación)
+    
+    FOREIGN KEY (idProducto) REFERENCES productos(idProductos) ON DELETE CASCADE,
+    FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuarios) ON DELETE CASCADE,
+    
+    -- Opcional: Asegura que un usuario solo pueda dejar una reseña por producto
+    UNIQUE (idProducto, idUsuario) 
+);
+
+
+
+
+

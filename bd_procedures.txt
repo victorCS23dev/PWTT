@@ -1,0 +1,1221 @@
+-- CONSULTAS
+
+DELIMITER ;;
+CREATE PROCEDURE obtener_usuario_por_correo(
+    IN p_correo VARCHAR(255)
+)
+BEGIN
+    SELECT
+        idUsuarios as id,
+        dni,
+        nombres,
+        apellidos,
+        correo,
+        contrasena, -- contraseña encriptada
+        telefono,
+        direccion,
+        rol,
+        fecha_creacion,
+        estado
+    FROM usuarios 
+    WHERE correo = p_correo
+    LIMIT 1;
+END ;;
+DELIMITER ;
+
+
+
+DELIMITER ;;
+CREATE PROCEDURE obtener_usuario_por_id (
+    IN usuario_id INT
+)
+BEGIN
+    SELECT
+        u.idUsuarios,
+        u.google_id, -- Google ID
+        u.dni,
+        u.nombres,
+        u.apellidos,
+        u.correo,
+        u.contrasena,
+        u.telefono,
+        u.direccion,
+        u.rol,
+        u.estado,
+        u.creado_por,
+        u_creador.nombres AS creado_por_nombre, 
+        u_creador.apellidos AS creado_por_apellido,
+        u.fecha_creacion,
+        u.modificado_por,
+        u_modificador.nombres AS modificado_por_nombre, 
+        u_modificador.apellidos AS modificado_por_apellido,
+        u.fecha_modificacion,
+        u.recibir_notificaciones_descuento
+    FROM
+        usuarios u
+    LEFT JOIN usuarios u_creador ON u.creado_por = u_creador.idUsuarios
+    LEFT JOIN usuarios u_modificador ON u.modificado_por = u_modificador.idUsuarios
+    WHERE
+        u.idUsuarios = usuario_id;
+END ;;
+DELIMITER ;
+
+
+
+DELIMITER ;;
+CREATE PROCEDURE `listar_usuarios`()
+BEGIN
+    SELECT 
+        u.idUsuarios AS id,
+        u.google_id, -- Google ID
+        u.dni,
+        u.nombres AS nombre,
+        u.apellidos AS apellido,
+        u.correo,
+        u.telefono,
+        u.direccion,
+        u.rol,
+        u.estado,
+        u.creado_por,
+        u_creador.nombres AS creado_por_nombre,
+        u_creador.apellidos AS creado_por_apellido,
+        u.fecha_creacion,
+        u.modificado_por,
+        u_modificador.nombres AS modificado_por_nombre, 
+        u_modificador.apellidos AS modificado_por_apellido,
+        u.fecha_modificacion
+    FROM usuarios u
+    LEFT JOIN usuarios u_creador ON u.creado_por = u_creador.idUsuarios
+    LEFT JOIN usuarios u_modificador ON u.modificado_por = u_modificador.idUsuarios;
+END ;;
+DELIMITER ;
+
+
+DELIMITER ;;
+CREATE PROCEDURE `listar_categorias`()
+BEGIN
+    SELECT 
+        c.idCategorias,
+        c.nombre AS categoria_nombre,
+        c.estado,
+        c.creado_por,
+        u_creador.nombres AS creado_por_nombre, 
+        u_creador.apellidos AS creado_por_apellido,
+        c.fecha_creacion,
+        c.modificado_por,
+        u_modificador.nombres AS modificado_por_nombre,
+        u_modificador.apellidos AS modificado_por_apellido,
+        c.fecha_modificacion
+    FROM categorias c
+    LEFT JOIN usuarios u_creador ON c.creado_por = u_creador.idUsuarios
+    LEFT JOIN usuarios u_modificador ON c.modificado_por = u_modificador.idUsuarios;
+END ;;
+DELIMITER ;
+
+DELIMITER ;;
+CREATE PROCEDURE `obtener_categoria_por_id`(
+    IN p_idCategorias INT
+)
+BEGIN
+    SELECT
+        c.idCategorias,
+        c.nombre AS categoria_nombre,
+        c.estado,
+        c.creado_por,
+        u_creador.nombres AS creado_por_nombre, 
+        u_creador.apellidos AS creado_por_apellido,
+        c.fecha_creacion,
+        c.modificado_por,
+        u_modificador.nombres AS modificado_por_nombre, 
+        u_modificador.apellidos AS modificado_por_apellido,
+        c.fecha_modificacion
+    FROM categorias c
+    LEFT JOIN usuarios u_creador ON c.creado_por = u_creador.idUsuarios
+    LEFT JOIN usuarios u_modificador ON c.modificado_por = u_modificador.idUsuarios
+    WHERE c.idCategorias = p_idCategorias;
+END ;;
+DELIMITER ;
+
+
+DELIMITER ;;
+CREATE PROCEDURE `listar_marcas`()
+BEGIN
+    SELECT 
+        m.idMarcas AS id, 
+        m.nombre AS nombre_marca, 
+        m.estado,
+        m.creado_por,
+        u_creador.nombres AS creado_por_nombre,
+        u_creador.apellidos AS creado_por_apellido,
+        m.fecha_creacion,
+        m.modificado_por,
+        u_modificador.nombres AS modificado_por_nombre,
+        u_modificador.apellidos AS modificado_por_apellido,
+        m.fecha_modificacion
+    FROM marcas m
+    LEFT JOIN usuarios u_creador ON m.creado_por = u_creador.idUsuarios
+    LEFT JOIN usuarios u_modificador ON m.modificado_por = u_modificador.idUsuarios
+    ORDER BY nombre_marca;
+END ;;
+DELIMITER ;
+
+
+DELIMITER ;;
+CREATE PROCEDURE `obtener_marca_por_id`(
+    IN p_idMarcas INT
+)
+BEGIN
+    SELECT
+        m.idMarcas,
+        m.nombre AS nombre_marca,
+        m.estado,
+        m.creado_por,
+        u_creador.nombres AS creado_por_nombre,
+        u_creador.apellidos AS creado_por_apellido,
+        m.fecha_creacion,
+        m.modificado_por,
+        u_modificador.nombres AS modificado_por_nombre,
+        u_modificador.apellidos AS modificado_por_apellido,
+        m.fecha_modificacion
+    FROM marcas m
+    LEFT JOIN usuarios u_creador ON m.creado_por = u_creador.idUsuarios
+    LEFT JOIN usuarios u_modificador ON m.modificado_por = u_modificador.idUsuarios
+    WHERE m.idMarcas = p_idMarcas;
+END ;;
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE obtenerMarcasPorCategoria(IN p_idCategoria INT)
+BEGIN
+    SELECT 
+        m.idMarcas, 
+        m.nombre 
+    FROM 
+        marcas m
+    INNER JOIN 
+        categoria_marca cm ON m.idMarcas = cm.idMarcas
+    WHERE 
+        cm.idCategorias = p_idCategoria;
+END //
+DELIMITER ;
+
+
+
+DELIMITER ;;
+CREATE PROCEDURE `listar_productos`()
+BEGIN
+    SELECT 
+        p.idProductos, 
+        p.nombre AS producto_nombre,
+        p.idMarcas as id_marca, 
+        m.nombre AS marca,
+        p.descripcion, 
+        p.precio, 
+        p.stock, 
+        p.imagen_url, 
+        p.estado, 
+        p.idCategorias as id_categoria,
+        c.nombre AS categoria_nombre,
+        p.creado_por,
+        u_creador.nombres AS creado_por_nombre,
+        u_creador.apellidos AS creado_por_apellido,
+        p.fecha_creacion,
+        p.modificado_por,
+        u_modificador.nombres AS modificado_por_nombre,
+        u_modificador.apellidos AS modificado_por_apellido,
+        p.fecha_modificacion
+    FROM productos p
+    INNER JOIN categorias c ON p.idCategorias = c.idCategorias
+    INNER JOIN marcas m ON p.idMarcas = m.idMarcas
+    LEFT JOIN usuarios u_creador ON p.creado_por = u_creador.idUsuarios
+    LEFT JOIN usuarios u_modificador ON p.modificado_por = u_modificador.idUsuarios;
+END ;;
+DELIMITER ;
+
+
+
+DELIMITER ;;
+CREATE PROCEDURE `listar_productos_activos`(
+    IN p_limite INT,
+    IN p_desplazamiento INT,
+    IN p_precio_min DECIMAL(10,2),
+    IN p_precio_max DECIMAL(10,2),
+    IN p_id_categoria INT,
+    IN p_id_marca INT,
+    IN p_ordenar_por VARCHAR(50),
+    IN p_search_query VARCHAR(255)
+)
+BEGIN
+    SET @sql = CONCAT(
+        'SELECT 
+            p.idProductos,
+            p.nombre AS producto_nombre,
+            p.idMarcas AS id_marca,
+            m.nombre AS marca,
+            p.descripcion,
+            p.precio,
+            p.stock,
+            p.imagen_url,
+            p.estado,
+            p.idCategorias AS id_categoria,
+            c.nombre AS categoria_nombre
+        FROM productos p
+        INNER JOIN categorias c ON p.idCategorias = c.idCategorias
+        INNER JOIN marcas m ON p.idMarcas = m.idMarcas
+        WHERE p.estado = 1'
+    );
+
+    IF p_precio_min IS NOT NULL THEN
+        SET @sql = CONCAT(@sql, ' AND p.precio >= ', p_precio_min);
+    END IF;
+
+    IF p_precio_max IS NOT NULL THEN
+        SET @sql = CONCAT(@sql, ' AND p.precio <= ', p_precio_max);
+    END IF;
+
+    IF p_id_categoria IS NOT NULL THEN
+        SET @sql = CONCAT(@sql, ' AND p.idCategorias = ', p_id_categoria);
+    END IF;
+
+    IF p_id_marca IS NOT NULL THEN
+        SET @sql = CONCAT(@sql, ' AND p.idMarcas = ', p_id_marca);
+    END IF;
+
+    IF p_search_query IS NOT NULL AND p_search_query != '' THEN
+        SET @sql = CONCAT(@sql, 
+            ' AND (p.nombre LIKE ''%', p_search_query, '%'' OR ',
+            'p.descripcion LIKE ''%', p_search_query, '%'' OR ',
+            'm.nombre LIKE ''%', p_search_query, '%'')'
+        );
+    END IF;
+
+    -- Agregar ordenamiento dinámico
+    CASE 
+        WHEN p_ordenar_por = 'precio_asc' THEN SET @sql = CONCAT(@sql, ' ORDER BY p.precio ASC');
+        WHEN p_ordenar_por = 'precio_desc' THEN SET @sql = CONCAT(@sql, ' ORDER BY p.precio DESC');
+        WHEN p_ordenar_por = 'nombre_asc' THEN SET @sql = CONCAT(@sql, ' ORDER BY p.nombre ASC');
+        WHEN p_ordenar_por = 'nombre_desc' THEN SET @sql = CONCAT(@sql, ' ORDER BY p.nombre DESC');
+        ELSE SET @sql = CONCAT(@sql, ' ORDER BY p.idProductos DESC'); -- Orden por defecto
+    END CASE;
+
+    SET @sql = CONCAT(@sql, ' LIMIT ', p_limite, ' OFFSET ', p_desplazamiento);
+
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END ;;
+DELIMITER ;
+
+
+
+
+
+DELIMITER ;;
+CREATE PROCEDURE `obtener_producto_por_id`(
+    IN p_idProductos INT
+)
+BEGIN
+    SELECT
+        p.idProductos,
+        p.nombre AS producto_nombre,
+        p.idMarcas AS id_marca, 
+        m.nombre AS marca,       
+        p.descripcion,
+        p.precio,
+        p.stock,
+        p.imagen_url,
+        p.estado AS producto_estado,
+        p.idCategorias,
+        c.nombre AS categoria_nombre,
+        p.creado_por,
+        u_creador.nombres AS creado_por_nombre, 
+        u_creador.apellidos AS creado_por_apellido,
+        p.fecha_creacion,
+        p.modificado_por,
+        u_modificador.nombres AS modificado_por_nombre, 
+        u_modificador.apellidos AS modificado_por_apellido,
+        p.fecha_modificacion
+    FROM productos p
+    INNER JOIN categorias c ON p.idCategorias = c.idCategorias
+    INNER JOIN marcas m ON p.idMarcas = m.idMarcas -- Unir con la tabla de marcas
+    LEFT JOIN usuarios u_creador ON p.creado_por = u_creador.idUsuarios
+    LEFT JOIN usuarios u_modificador ON p.modificado_por = u_modificador.idUsuarios
+    WHERE p.idProductos = p_idProductos;
+END ;;
+DELIMITER ;
+
+
+DELIMITER ;;
+CREATE PROCEDURE listar_facturas_usuario (
+    IN p_idUsuario INT
+)
+BEGIN
+    SELECT 
+        fc.idFactura,
+        fc.fecha,
+        fc.metodo_pago,
+        fc.monto_total,
+        fc.estado,
+        p.nombre AS producto,
+        fd.cantidad,
+        fd.precio_unitario,
+        fd.subtotal
+    FROM factura_cabecera fc
+    INNER JOIN factura_detalle fd ON fc.idFactura = fd.idFactura
+    INNER JOIN productos p ON fd.idProducto = p.idProductos
+    WHERE fc.idUsuario = p_idUsuario
+    ORDER BY fc.idFactura DESC, fd.idDetalle; -- Ordenar por idFactura descendente para ver las más recientes primero
+END ;;
+DELIMITER ;
+
+
+
+DELIMITER ;;
+CREATE PROCEDURE obtener_detalle_factura (
+    IN p_idFactura INT
+)
+BEGIN
+    SELECT 
+        fc.idFactura,
+        fc.fecha,
+        fc.metodo_pago,
+        fc.monto_total,
+        fc.estado,
+        fc.idCodigoDescuento,
+        fc.monto_descuento,
+
+        u.nombres AS nombre_cliente,
+        u.apellidos AS apellido_cliente,
+        u.dni AS dni_cliente,
+        u.correo AS correo_cliente,
+
+        cd.codigo AS codigo_descuento_aplicado,
+        cd.valor_descuento AS porcentaje_descuento, 
+
+        fd.idProducto,
+        p.nombre AS producto,
+        fd.cantidad,
+        fd.precio_unitario,
+        fd.subtotal
+
+    FROM factura_cabecera fc
+    INNER JOIN usuarios u ON fc.idUsuario = u.idUsuarios
+    INNER JOIN factura_detalle fd ON fc.idFactura = fd.idFactura
+    INNER JOIN productos p ON fd.idProducto = p.idProductos
+    LEFT JOIN codigos_descuento cd ON fc.idCodigoDescuento = cd.idCodigo 
+
+    WHERE fc.idFactura = p_idFactura
+    ORDER BY fd.idDetalle;
+END ;;
+DELIMITER ;
+
+
+
+
+
+DELIMITER //
+CREATE PROCEDURE obtenerStockProducto(IN p_idProducto INT)
+BEGIN
+    SELECT stock FROM productos WHERE idProductos = p_idProducto;
+END //
+DELIMITER ;
+
+
+
+DELIMITER //
+CREATE PROCEDURE listar_facturas()
+BEGIN
+    SELECT 
+        fc.idFactura,
+        fc.fecha,
+        fc.metodo_pago,
+        fc.monto_total,
+        fc.estado,
+        fc.monto_descuento,
+        cd.codigo AS codigo_descuento_aplicado,
+        u.nombres AS nombre_cliente,
+        u.apellidos AS apellido_cliente,
+        u.correo AS correo_cliente,
+        u.dni AS dni_cliente,
+        fd.idProducto,
+        p.nombre AS producto,
+        fd.cantidad,
+        fd.precio_unitario,
+        fd.subtotal
+    
+    FROM factura_cabecera fc
+
+    INNER JOIN usuarios u ON fc.idUsuario = u.idUsuarios
+    INNER JOIN factura_detalle fd ON fc.idFactura = fd.idFactura
+    INNER JOIN productos p ON fd.idProducto = p.idProductos
+    LEFT JOIN codigos_descuento cd ON fc.idCodigoDescuento = cd.idCodigo
+    ORDER BY fc.idFactura DESC, fd.idDetalle ASC;
+
+END //
+DELIMITER ;
+
+
+
+DELIMITER //
+CREATE PROCEDURE listar_productos_mas_vendidos(IN p_limit INT)
+BEGIN
+    SELECT
+        p.idProductos,
+        p.nombre AS nombre_producto,
+        SUM(fd.cantidad) AS cantidad_vendida
+    FROM
+        factura_detalle fd
+    JOIN
+        productos p ON fd.idProducto = p.idProductos
+    JOIN
+        factura_cabecera f ON fd.idFactura = f.idFactura -- Unir con la tabla factura
+    WHERE
+        f.estado BETWEEN 1 AND 4 -- Filtrar por estados 1, 2, 3 y 4
+    GROUP BY
+        p.idProductos, p.nombre
+    ORDER BY
+        cantidad_vendida DESC
+    LIMIT p_limit;
+END //
+DELIMITER ;
+
+
+
+
+
+-- REGISTROS
+
+DELIMITER ;;
+CREATE PROCEDURE `registrar_usuario`(
+    IN p_dni CHAR(8),
+    IN p_nombres VARCHAR(100),
+    IN p_apellidos VARCHAR(100), 
+    IN p_correo VARCHAR(100), 
+    IN p_contrasena VARCHAR(255), 
+    IN p_telefono CHAR(9), 
+    IN p_direccion VARCHAR(255), 
+    IN p_rol VARCHAR(20),
+    IN p_creado_por INT 
+)
+BEGIN
+    INSERT INTO usuarios (dni, nombres, apellidos, correo, contrasena, telefono, direccion, rol, estado, creado_por) 
+    VALUES (p_dni, p_nombres, p_apellidos, p_correo, p_contrasena, p_telefono, p_direccion, p_rol, 1, p_creado_por);
+END ;;
+DELIMITER ;
+
+DELIMITER ;;
+CREATE PROCEDURE registrar_usuario_google(
+    IN p_google_id VARCHAR(255),
+    IN p_dni VARCHAR(8),
+    IN p_nombres VARCHAR(100),
+    IN p_apellidos VARCHAR(100),
+    IN p_correo VARCHAR(100),
+    IN p_contrasena VARCHAR(255), -- Contraseña hasheada aleatoria
+    IN p_telefono CHAR(9),
+    IN p_direccion VARCHAR(255),
+    IN p_rol VARCHAR(20)
+)
+BEGIN
+    INSERT INTO usuarios (google_id, dni, nombres, apellidos, correo, contrasena, telefono, direccion, rol, estado)
+    VALUES (p_google_id, p_dni, p_nombres, p_apellidos, p_correo, p_contrasena, p_telefono, p_direccion, p_rol, 1);
+END ;;
+DELIMITER ;
+
+
+DELIMITER ;;
+CREATE PROCEDURE `registrar_categoria`(
+    IN p_nombre VARCHAR(100),
+    IN p_creado_por INT
+)
+BEGIN
+    INSERT INTO categorias (nombre, estado, creado_por)
+    VALUES (p_nombre, 1, p_creado_por);
+END ;;
+DELIMITER ;
+
+
+DELIMITER ;;
+CREATE PROCEDURE `registrar_marca`(
+    IN p_nombre VARCHAR(100),
+    IN p_creado_por INT
+)
+BEGIN
+    INSERT INTO marcas (nombre, estado, creado_por, fecha_creacion, modificado_por, fecha_modificacion)
+    VALUES (p_nombre, 1, p_creado_por, NOW(), NULL, NULL); 
+END ;;
+DELIMITER ;
+
+
+DELIMITER ;;
+CREATE PROCEDURE `registrar_producto`(
+    IN p_nombre VARCHAR(100),
+    IN p_idMarcas INT,
+    IN p_descripcion TEXT,
+    IN p_precio DECIMAL(10,2),
+    IN p_stock INT,
+    IN p_idCategorias INT,
+    IN p_imagen_url VARCHAR(255),
+    IN p_creado_por INT 
+)
+BEGIN
+    INSERT INTO productos (nombre, idMarcas, descripcion, precio, stock, idCategorias, imagen_url, estado, creado_por, fecha_creacion, modificado_por, fecha_modificacion)
+    VALUES (p_nombre, p_idMarcas, p_descripcion, p_precio, p_stock, p_idCategorias, p_imagen_url, 1, p_creado_por, NOW(), NULL, NULL);
+END ;;
+DELIMITER ;
+
+
+
+DELIMITER ;;
+CREATE PROCEDURE registrar_factura (
+    IN p_idUsuario INT,
+    IN p_metodo_pago VARCHAR(50),
+    IN p_monto_total DECIMAL(10,2),
+    IN p_productos JSON,
+    IN p_idCodigoDescuento INT,   -- Nuevo parámetro para el ID del código de descuento
+    IN p_montoDescuento DECIMAL(10,2) -- Nuevo parámetro para el monto del descuento
+)
+BEGIN
+    DECLARE v_idFactura INT;
+    DECLARE i INT DEFAULT 0;
+    DECLARE total_productos INT;
+    DECLARE v_idProducto_detalle INT;
+    DECLARE v_cantidad_detalle INT;
+    DECLARE v_precio_unitario DECIMAL(10,2);
+    DECLARE v_subtotal DECIMAL(10,2);
+    DECLARE v_stock_disponible INT;
+    DECLARE v_error_message VARCHAR(255);
+
+    -- Para manejar transacciones atómicas
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- Si ocurre un error, revertir toda la transacción
+        ROLLBACK;
+        -- Aquí podrías usar un mensaje genérico o manejar el error específico que no fue capturado
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error al registrar la factura. La transacción ha sido revertida debido a un problema inesperado.';
+    END;
+
+    -- Iniciar la transacción
+    START TRANSACTION;
+
+    -- Obtener la cantidad de productos del JSON
+    SET total_productos = JSON_LENGTH(p_productos);
+
+    -- Insertar en factura_cabecera (estado por defecto: 1 - Pendiente)
+    -- Se incluyen los nuevos campos de descuento
+    INSERT INTO factura_cabecera (idUsuario, metodo_pago, monto_total, idCodigoDescuento, monto_descuento, estado)
+    VALUES (p_idUsuario, p_metodo_pago, p_monto_total, p_idCodigoDescuento, p_montoDescuento, 1); -- Estado inicial 1 (Pendiente)
+
+    SET v_idFactura = LAST_INSERT_ID();
+
+    -- Loop para validar stock, insertar en factura_detalle y actualizar stock de productos
+    WHILE i < total_productos DO
+        SET v_idProducto_detalle = JSON_UNQUOTE(JSON_EXTRACT(p_productos, CONCAT('$[', i, '].idProducto')));
+        SET v_cantidad_detalle = JSON_UNQUOTE(JSON_EXTRACT(p_productos, CONCAT('$[', i, '].cantidad')));
+        SET v_precio_unitario = JSON_UNQUOTE(JSON_EXTRACT(p_productos, CONCAT('$[', i, '].precio')));
+        SET v_subtotal = v_cantidad_detalle * v_precio_unitario;
+
+        -- *** Validar stock disponible antes de proceder ***
+        SELECT stock INTO v_stock_disponible
+        FROM productos
+        WHERE idProductos = v_idProducto_detalle;
+
+        -- Si no hay suficiente stock, abortar la transacción
+        IF v_stock_disponible IS NULL OR v_cantidad_detalle > v_stock_disponible THEN
+            -- Construir el mensaje de error en la variable
+            SET v_error_message = CONCAT('No hay suficiente stock para el producto con ID: ', v_idProducto_detalle, '. Stock disponible: ', IFNULL(v_stock_disponible, 0), ', cantidad solicitada: ', v_cantidad_detalle);
+            -- Revertir la transacción completa y lanzar el error usando la variable
+            ROLLBACK;
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_message;
+        END IF;
+
+        -- Solo si se envió un idCodigoDescuento válido
+        IF p_idCodigoDescuento IS NOT NULL THEN
+            DECLARE v_categoria_producto INT;
+            DECLARE v_marca_producto INT;
+            DECLARE v_aplica_categoria INT;
+            DECLARE v_aplica_marca INT;
+
+            -- Obtener categoría y marca del producto
+            SELECT idCategorias, idMarcas INTO v_categoria_producto, v_marca_producto
+            FROM productos
+            WHERE idProductos = v_idProducto_detalle;
+
+            -- Obtener a qué aplica el descuento
+            SELECT aplica_a_categoria, aplica_a_marca INTO v_aplica_categoria, v_aplica_marca
+            FROM codigos_descuento
+            WHERE idCodigo = p_idCodigoDescuento;
+
+            -- Validar si el producto cumple con la categoría (si aplica_a_categoria no es NULL)
+            IF v_aplica_categoria IS NOT NULL AND v_categoria_producto != v_aplica_categoria THEN
+                SET v_error_message = CONCAT('El producto con ID: ', v_idProducto_detalle, ' no pertenece a la categoría permitida por el descuento.');
+                ROLLBACK;
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_message;
+            END IF;
+
+            -- Validar si el producto cumple con la marca (si aplica_a_marca no es NULL)
+            IF v_aplica_marca IS NOT NULL AND v_marca_producto != v_aplica_marca THEN
+                SET v_error_message = CONCAT('El producto con ID: ', v_idProducto_detalle, ' no pertenece a la marca permitida por el descuento.');
+                ROLLBACK;
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_message;
+            END IF;
+        END IF;
+
+        
+        -- Insertar en factura_detalle
+        INSERT INTO factura_detalle (
+            idFactura,
+            idProducto,
+            cantidad,
+            precio_unitario,
+            subtotal
+        )
+        VALUES (
+            v_idFactura,
+            v_idProducto_detalle,
+            v_cantidad_detalle,
+            v_precio_unitario,
+            v_subtotal
+        );
+
+        -- Actualizar la cantidad del producto (stock)
+        UPDATE productos
+        SET stock = stock - v_cantidad_detalle
+        WHERE idProductos = v_idProducto_detalle;
+
+        SET i = i + 1;
+    END WHILE;
+
+    -- Si todo fue exitoso, confirmar la transacción
+    COMMIT;
+
+    -- Devolver el ID de la factura generada
+    SELECT v_idFactura;
+
+END ;;
+DELIMITER ;
+
+
+
+-- ACTUALIZACION
+
+DELIMITER ;;
+CREATE PROCEDURE `actualizar_rol_estado`(
+    IN p_idUsuarios INT,
+    IN p_rol VARCHAR(20),
+    IN p_estado BOOLEAN,
+    IN p_modificado_por INT 
+)
+BEGIN
+    UPDATE usuarios
+    SET
+        rol = p_rol,
+        estado = p_estado,
+        modificado_por = p_modificado_por 
+    WHERE idUsuarios = p_idUsuarios;
+END ;;
+DELIMITER ;
+
+
+DELIMITER ;;
+CREATE PROCEDURE `actualizar_perfil_usuario`(
+    IN p_idUsuarios INT,
+    IN p_dni CHAR(8),
+    IN p_nombres VARCHAR(100),
+    IN p_apellidos VARCHAR(100),
+    IN p_telefono CHAR(9),
+    IN p_direccion VARCHAR(255),
+    IN p_modificado_por INT
+)
+BEGIN
+    UPDATE usuarios
+    SET
+        dni = p_dni,
+        nombres = p_nombres,
+        apellidos = p_apellidos,
+        telefono = p_telefono,
+        direccion = p_direccion,
+        modificado_por = p_modificado_por
+    WHERE idUsuarios = p_idUsuarios;
+END ;;
+DELIMITER ;
+
+
+
+DELIMITER ;;
+CREATE PROCEDURE `actualizar_categoria`(
+    IN p_idCategorias INT,
+    IN p_nombre VARCHAR(100),
+    IN p_estado BOOLEAN,
+    IN p_modificado_por INT 
+)
+BEGIN
+    UPDATE categorias
+    SET
+        nombre = p_nombre,
+        estado = p_estado,
+        modificado_por = p_modificado_por 
+    WHERE idCategorias = p_idCategorias;
+END ;;
+DELIMITER ;
+
+
+DELIMITER ;;
+CREATE PROCEDURE `actualizar_marca`(
+    IN p_idMarcas INT,
+    IN p_nombre VARCHAR(100),
+    IN p_estado BOOLEAN,
+    IN p_modificado_por INT 
+)
+BEGIN
+    UPDATE marcas
+    SET
+        nombre = p_nombre,
+        estado = p_estado,
+        modificado_por = p_modificado_por,
+        fecha_modificacion = NOW()
+    WHERE idMarcas = p_idMarcas;
+END ;;
+DELIMITER ;
+
+
+DELIMITER ;;
+CREATE PROCEDURE `actualizar_producto`(
+    IN p_idProductos INT,
+    IN p_nombre VARCHAR(100),
+    IN p_idMarcas INT,
+    IN p_descripcion TEXT,
+    IN p_precio DECIMAL(10,2),
+    IN p_stock INT,
+    IN p_idCategorias INT,
+    IN p_imagen_url VARCHAR(255),
+    IN p_estado BOOLEAN, 
+    IN p_modificado_por INT 
+)
+BEGIN
+    UPDATE productos
+    SET
+        nombre = p_nombre,
+        idMarcas = p_idMarcas,
+        descripcion = p_descripcion,
+        precio = p_precio,
+        stock = p_stock,
+        idCategorias = p_idCategorias,
+        imagen_url = p_imagen_url,
+        estado = p_estado,
+        modificado_por = p_modificado_por,
+        fecha_modificacion = NOW() 
+    WHERE idProductos = p_idProductos;
+END ;;
+DELIMITER ;
+
+DELIMITER ;;
+CREATE PROCEDURE solicitar_cancelacion_factura (
+    IN p_idFactura INT
+)
+BEGIN
+    -- Actualizar el estado de la factura a 'Solicitud de Cancelación' (6)
+    -- Solo permite la solicitud si el estado actual es Pendiente (1) o En preparación (2)
+    UPDATE factura_cabecera
+    SET estado = 6
+    WHERE idFactura = p_idFactura AND (estado = 1 OR estado = 2);
+
+    -- Si la factura no pudo ser actualizada (no se encontró o no estaba en estado cancelable)
+    IF ROW_COUNT() = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'La factura no pudo ser actualizada a estado de solicitud de cancelación. Asegúrese de que existe y su estado sea Pendiente o En preparación.';
+    END IF;
+END ;;
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE editarCategoriaConMarcas(
+    IN p_idCategoria INT,
+    IN p_nombre VARCHAR(100),
+    IN p_estado BOOLEAN,
+    IN p_modificado_por INT,
+    IN p_marcas_csv TEXT -- Una cadena de texto con IDs de marcas separados por comas (ej. "1,5,10")
+)
+BEGIN
+    DECLARE v_current_timestamp DATETIME;
+    SET v_current_timestamp = NOW();
+
+    -- Iniciar Transacción
+    START TRANSACTION;
+
+    -- 1. Actualizar la categoría
+    UPDATE categorias
+    SET
+        nombre = p_nombre,
+        estado = p_estado,
+        modificado_por = p_modificado_por,
+        fecha_modificacion = v_current_timestamp
+    WHERE idCategorias = p_idCategoria;
+
+    -- 2. Eliminar las asociaciones de marcas existentes para esta categoría
+    DELETE FROM categoria_marca WHERE idCategorias = p_idCategoria;
+
+    -- 3. Insertar las nuevas asociaciones de marcas si p_marcas_csv no está vacío
+    IF p_marcas_csv IS NOT NULL AND p_marcas_csv != '' THEN
+        INSERT INTO categoria_marca (idCategorias, idMarcas, creado_por, fecha_creacion, modificado_por, fecha_modificacion)
+        SELECT
+            p_idCategoria,
+            CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(p_marcas_csv, ',', n.n), ',', -1) AS UNSIGNED),
+            p_modificado_por, -- El usuario que modifica es el creador de la nueva relación
+            v_current_timestamp,
+            p_modificado_por,
+            v_current_timestamp
+        FROM (
+            -- Genera una secuencia de números para dividir la cadena CSV
+            SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10
+            -- Puedes extender esta lista si esperas más de 10 marcas asociadas
+        ) n
+        WHERE n.n <= 1 + (LENGTH(p_marcas_csv) - LENGTH(REPLACE(p_marcas_csv, ',', '')));
+    END IF;
+
+    -- Confirmar Transacción
+    COMMIT;
+
+END //
+DELIMITER ;
+
+
+
+DELIMITER //
+CREATE PROCEDURE actualizar_estado_factura(
+    IN p_idFactura INT,
+    IN p_nuevoEstado INT,
+    IN p_modificadoPor INT -- ID del usuario (admin/empleado) que realiza la modificación
+)
+BEGIN
+    UPDATE factura_cabecera
+    SET 
+        estado = p_nuevoEstado,
+        modificado_por = p_modificadoPor,
+        fecha_modificacion = CURRENT_TIMESTAMP
+    WHERE 
+        idFactura = p_idFactura;
+END //
+DELIMITER ;
+
+
+-- ELIMINACION
+
+DELIMITER ;;
+CREATE PROCEDURE `eliminar_categoria`(
+    IN p_idCategorias INT
+)
+BEGIN
+    DELETE FROM categorias
+    WHERE idCategorias = p_idCategorias;
+END ;;
+DELIMITER ;
+
+
+DELIMITER ;;
+CREATE PROCEDURE `eliminar_marca`(
+    IN p_idMarcas INT
+)
+BEGIN
+    DELETE FROM marcas
+    WHERE idMarcas = p_idMarcas;
+END ;;
+DELIMITER ;
+
+
+DELIMITER ;;
+CREATE PROCEDURE `eliminar_producto`(
+    IN p_idProductos INT
+)
+BEGIN
+    DELETE FROM productos
+    WHERE idProductos = p_idProductos;
+END ;;
+DELIMITER ;
+
+
+
+
+DELIMITER ;;
+CREATE PROCEDURE `eliminar_usuario`(
+    IN p_idUsuarios INT
+)
+BEGIN
+    DECLARE v_es_admin BOOLEAN;
+    DECLARE v_total_admins INT;
+
+    -- Obtener el rol del usuario que se intenta eliminar y su estado
+    SELECT (rol = 'administrador') INTO v_es_admin
+    FROM usuarios
+    WHERE idUsuarios = p_idUsuarios AND estado = 1;
+
+    -- Si el usuario a eliminar es un administrador activo
+    IF v_es_admin THEN
+        -- Contar cuántos administradores activos hay en total
+        SELECT COUNT(*) INTO v_total_admins
+        FROM usuarios
+        WHERE rol = 'administrador' AND estado = 1;
+
+        -- Si solo queda un administrador activo (y ese es el que intentamos eliminar)
+        IF v_total_admins = 1 THEN
+            -- No permitir la eliminación
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No se puede eliminar el único administrador activo del sistema.';
+        ELSE
+            -- Si hay más de un administrador, eliminar el usuario
+            DELETE FROM usuarios
+            WHERE idUsuarios = p_idUsuarios;
+        END IF;
+    ELSE
+        -- Si el usuario no es un administrador, eliminarlo directamente
+        DELETE FROM usuarios
+        WHERE idUsuarios = p_idUsuarios;
+    END IF;
+END ;;
+DELIMITER ;
+
+
+CALL registrar_usuario('12345678','Administrador','Admin','admin3@admin.com','$2y$10$5.5sWsXFqbUBR.pZJfD5GObrw3tpF9jUdIbn5WXw102sL7wRsIE/O','987654321','Dirección del administrador','administrador', NULL);
+
+
+
+
+DELIMITER //
+CREATE PROCEDURE registrar_descuento(
+    IN p_codigo VARCHAR(50),
+    IN p_valor_descuento DECIMAL(5,2),
+    IN p_aplica_a_categoria INT,
+    IN p_aplica_a_marca INT,
+    IN p_descripcion TEXT,
+    IN p_fecha_inicio DATETIME,
+    IN p_fecha_fin DATETIME,
+    IN p_creado_por INT
+)
+BEGIN
+    INSERT INTO codigos_descuento (
+        codigo, valor_descuento, aplica_a_categoria, aplica_a_marca,
+        descripcion, fecha_inicio, fecha_fin, creado_por
+    ) VALUES (
+        p_codigo, p_valor_descuento, p_aplica_a_categoria, p_aplica_a_marca,
+        p_descripcion, p_fecha_inicio, p_fecha_fin, p_creado_por
+    );
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE listar_descuentos()
+BEGIN
+    SELECT 
+        cd.idCodigo, cd.codigo, cd.valor_descuento, cd.aplica_a_categoria, cd.aplica_a_marca, 
+        cd.descripcion, cd.fecha_inicio, cd.fecha_fin, cd.estado,
+        c.nombre AS categoria_nombre, m.nombre AS marca_nombre, 
+        u_creador.nombres AS creador_nombre, u_creador.apellidos AS creador_apellido,
+        cd.fecha_creacion,
+        u_modificador.nombres AS modificado_por_nombre, u_modificador.apellidos AS modificado_por_apellido,
+        cd.fecha_modificacion
+    FROM codigos_descuento cd
+    LEFT JOIN categorias c ON cd.aplica_a_categoria = c.idCategorias
+    LEFT JOIN marcas m ON cd.aplica_a_marca = m.idMarcas
+    LEFT JOIN usuarios u_creador ON cd.creado_por = u_creador.idUsuarios
+    LEFT JOIN usuarios u_modificador ON cd.modificado_por = u_modificador.idUsuarios
+    ORDER BY cd.fecha_creacion DESC;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE obtener_descuento_por_id(
+    IN p_idCodigo INT
+)
+BEGIN
+    SELECT 
+        cd.idCodigo, cd.codigo, cd.valor_descuento, cd.aplica_a_categoria, cd.aplica_a_marca, 
+        cd.descripcion, cd.fecha_inicio, cd.fecha_fin, cd.estado,
+        c.nombre AS categoria_nombre, m.nombre AS marca_nombre, 
+        u_creador.nombres AS creador_nombre, u_creador.apellidos AS creador_apellido,
+        cd.fecha_creacion,
+        u_modificador.nombres AS modificado_por_nombre, u_modificador.apellidos AS modificado_por_apellido,
+        cd.fecha_modificacion
+    FROM codigos_descuento cd
+    LEFT JOIN categorias c ON cd.aplica_a_categoria = c.idCategorias
+    LEFT JOIN marcas m ON cd.aplica_a_marca = m.idMarcas
+    LEFT JOIN usuarios u_creador ON cd.creado_por = u_creador.idUsuarios
+    LEFT JOIN usuarios u_modificador ON cd.modificado_por = u_modificador.idUsuarios
+    WHERE cd.idCodigo = p_idCodigo;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE actualizar_descuento(
+    IN p_idCodigo INT,
+    IN p_codigo VARCHAR(50),
+    IN p_valor_descuento DECIMAL(5,2),
+    IN p_aplica_a_categoria INT,
+    IN p_aplica_a_marca INT,
+    IN p_descripcion TEXT,
+    IN p_fecha_inicio DATETIME,
+    IN p_fecha_fin DATETIME,
+    IN p_estado BOOLEAN,
+    IN p_modificado_por INT
+)
+BEGIN
+    UPDATE codigos_descuento SET 
+        codigo = p_codigo, 
+        valor_descuento = p_valor_descuento, 
+        aplica_a_categoria = p_aplica_a_categoria, 
+        aplica_a_marca = p_aplica_a_marca, 
+        descripcion = p_descripcion, 
+        fecha_inicio = p_fecha_inicio, 
+        fecha_fin = p_fecha_fin, 
+        estado = p_estado, 
+        modificado_por = p_modificado_por, 
+        fecha_modificacion = CURRENT_TIMESTAMP
+    WHERE idCodigo = p_idCodigo;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE eliminar_descuento(
+    IN p_idCodigo INT
+)
+BEGIN
+    DELETE FROM codigos_descuento WHERE idCodigo = p_idCodigo;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE actualizar_preferencia_notificacion_usuario(
+    IN p_idUsuarios INT,
+    IN p_recibir_notificaciones_descuento BOOLEAN,
+    IN p_modificado_por INT
+)
+BEGIN
+    UPDATE usuarios
+    SET
+        recibir_notificaciones_descuento = p_recibir_notificaciones_descuento,
+        modificado_por = p_modificado_por,
+        fecha_modificacion = CURRENT_TIMESTAMP
+    WHERE idUsuarios = p_idUsuarios;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE obtener_usuarios_para_notificacion()
+BEGIN
+    SELECT 
+        idUsuarios,
+        nombres,
+        apellidos,
+        correo
+    FROM 
+        usuarios
+    WHERE 
+        recibir_notificaciones_descuento = 1 AND estado = 1 AND rol = 'cliente';
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE validar_codigo_descuento(IN p_codigo VARCHAR(50))
+BEGIN
+    SELECT 
+        idCodigo, 
+        codigo, 
+        valor_descuento,
+        aplica_a_categoria,
+        aplica_a_marca,
+        fecha_inicio,
+        fecha_fin
+    FROM 
+        codigos_descuento
+    WHERE 
+        codigo = p_codigo
+        AND estado = 1 -- Debe estar activo
+        AND fecha_inicio <= NOW() -- La fecha de inicio debe ser hoy o en el pasado
+        AND (fecha_fin IS NULL OR fecha_fin >= NOW()); -- La fecha de fin debe ser nula (no expira) o en el futuro
+END //
+DELIMITER ;
+
+
+
+DELIMITER //
+CREATE PROCEDURE obtener_ventas_totalesMes()
+BEGIN
+    SELECT 
+        COALESCE(SUM(monto_total), 0) AS total_ventas
+    FROM 
+        factura_cabecera
+    WHERE 
+        YEAR(fecha) = YEAR(CURDATE()) AND MONTH(fecha) = MONTH(CURDATE())
+        AND estado IN (1, 2, 3, 4); -- Considera estados que contribuyen a las ventas (Pendiente, En preparación, En camino, Entregado)
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE obtener_pedidos_pendientes_count()
+BEGIN
+    SELECT 
+        COUNT(DISTINCT idFactura) AS count
+    FROM 
+        factura_cabecera
+    WHERE 
+        estado IN (1, 2); -- 1: Pendiente, 2: En preparación
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE obtener_nuevos_usuarios_7DiasCount()
+BEGIN
+    SELECT 
+        COUNT(idUsuarios) AS count
+    FROM 
+        usuarios
+    WHERE 
+        fecha_creacion >= DATE_SUB(CURDATE(), INTERVAL 7 DAY);
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE obtener_productos_bajo_stockCount(IN p_umbral INT)
+BEGIN
+    SELECT 
+        COUNT(idProductos) AS count
+    FROM 
+        productos
+    WHERE 
+        stock <= p_umbral AND estado = 1; -- Solo productos activos
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE obtener_ventas_por_rango_fechas(
+    IN p_fecha_inicio DATE,
+    IN p_fecha_fin DATE
+)
+BEGIN
+    SELECT
+        fc.idFactura,
+        fc.fecha,
+        fc.metodo_pago,
+        fc.monto_total,
+        fc.estado,
+        u.nombres AS nombre_cliente,
+        u.apellidos AS apellido_cliente
+    FROM
+        factura_cabecera fc
+    INNER JOIN
+        usuarios u ON fc.idUsuario = u.idUsuarios
+    WHERE
+        fc.fecha BETWEEN p_fecha_inicio AND p_fecha_fin
+    ORDER BY
+        fc.fecha ASC, fc.idFactura ASC;
+END //
+DELIMITER ;
+
+
