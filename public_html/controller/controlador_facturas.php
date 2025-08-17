@@ -284,12 +284,12 @@ function registrarFactura($factura_model) {
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'cabrerasanchezv11@gmail.com'; // Tu Gmail
-            $mail->Password = 'irea vcfr nvrn clhh'; // Tu Contraseña de aplicación
+            $mail->Username = 'TUGMAIL@gmail.com'; // Tu Gmail
+            $mail->Password = 'CONTRASENA GMAIL'; // Tu Contraseña de aplicación
             $mail->SMTPSecure = 'tls';
             $mail->Port = 587;
 
-            $mail->setFrom('cabrerasanchezv11@gmail.com', 'PCBYTE - Confirmación de Compra');
+            $mail->setFrom('TUGMAIL@gmail.com', 'PCBYTE - Confirmación de Compra');
             $mail->addAddress($correoDestinatario); // Correo del cliente
 
             $mail->isHTML(true); // Establecer formato de correo a HTML
