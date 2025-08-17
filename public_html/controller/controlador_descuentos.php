@@ -267,13 +267,13 @@ function notificarDescuento($usuario_model) {
                 $mail->isSMTP();
                 $mail->Host = 'smtp.gmail.com';
                 $mail->SMTPAuth = true;
-                $mail->Username = 'cabrerasanchezv11@gmail.com'; // Tu Gmail
-                $mail->Password = 'irea vcfr nvrn clhh'; // Tu Contraseña de aplicación
+                $mail->Username = 'TUGMAIL@gmail.com'; // Tu Gmail
+                $mail->Password = 'CONTRASENA APLICATION'; // Tu Contraseña de aplicación
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Usar TLS
                 $mail->Port = 587;
 
                 // Remitente y destinatario
-                $mail->setFrom('cabrerasanchezv11@gmail.com', 'PCBYTE - Descuentos Exclusivos');
+                $mail->setFrom('TUGMAIL@gmail.com', 'PCBYTE - Descuentos Exclusivos');
                 $mail->addAddress($destinatario, $nombreDestinatario);
 
                 // Contenido del correo
